@@ -89,6 +89,6 @@ cat("\n")
 # ------------------------------------------------------------------------------
 # 4. Save Hotspot Summary Report
 # ------------------------------------------------------------------------------
-output_report <- "baguio_dengue_hotspot_summary.csv"
+output_report <- file.path("datasets", "baguio_dengue_hotspot_summary.csv")
 write.csv(brgy_stats, output_report, row.names = FALSE)
 cat(sprintf("=> Saved complete Hotspot & Incidence summary to: %s\n", output_report))

@@ -68,6 +68,6 @@ age_dist <- table(df$age_group, df$clinical_classification)
 print(age_dist)
 cat("\n")
 
-output_report <- "baguio_dengue_hotspot_summary.csv"
+output_report <- file.path("datasets", "baguio_dengue_hotspot_summary.csv")
 write.csv(brgy_stats, output_report, row.names = FALSE)
 cat(sprintf("=> Saved complete Hotspot & Incidence summary to: %s\n", output_report))
