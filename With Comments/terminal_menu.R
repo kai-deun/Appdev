@@ -226,6 +226,18 @@ action_trends <- function() {
   }
 }
 
+# [6] Export Hotspot Metrics Report
+action_export <- function() {
+  print_header("EXPORT HOTSPOT METRICS REPORT")
+  
+  metrics <- calculate_barangay_hotspots(df, geo)
+  timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+  filename <- sprintf("dengue_export_%s.csv", timestamp)
+  
+  write.csv(metrics, filename, row.names = FALSE)
+  cat(sprintf("=> Successfully exported %d rows to: %s\n", nrow(metrics), filename))
+}
+
 # ------------------------------------------------------------------------------
 # 4. MAIN TERMINAL MENU LOOP
 # ------------------------------------------------------------------------------
@@ -240,10 +252,11 @@ main <- function() {
     cat("  [3] Search Barangay Surveillance Profile\n")
     cat("  [4] Demographic & Clinical Analysis\n")
     cat("  [5] Annual & Weekly Trend Analysis\n")
+    cat("  [6] Export Hotspot Metrics to CSV\n")
     cat("  [0] Exit\n")
     cat("====================================================================\n")
     
-    choice <- prompt_input("Enter choice [0-5]: ")
+    choice <- prompt_input("Enter choice [0-6]: ")
     
     switch(
       choice,
@@ -252,6 +265,7 @@ main <- function() {
       "3" = { action_search(); pause_screen() },
       "4" = { action_demographics(); pause_screen() },
       "5" = { action_trends(); pause_screen() },
+      "6" = { action_export(); pause_screen() },
       "0" = {
         cat("\nExiting Baguio Dengue Surveillance Terminal. Stay safe!\n\n")
         break
@@ -260,7 +274,7 @@ main <- function() {
         cat("\nExiting Baguio Dengue Surveillance Terminal. Stay safe!\n\n")
         break
       },
-      cat("\n[!] Invalid input. Please enter an option from 0 to 5.\n")
+      cat("\n[!] Invalid input. Please enter an option from 0 to 6.\n")
     )
   }
 }
