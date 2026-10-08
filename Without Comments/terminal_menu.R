@@ -9,6 +9,11 @@ if (!file.exists(SURVEILLANCE_FILE)) {
 df  <- read.csv(SURVEILLANCE_FILE, stringsAsFactors = FALSE)
 geo <- if (file.exists(GEO_FILE)) read.csv(GEO_FILE, stringsAsFactors = FALSE) else NULL
 
+missing_age_count <- sum(is.na(df$age))
+if (missing_age_count > 0) {
+  warning(sprintf("%d surveillance record(s) missing age value; excluded from age group analysis.", missing_age_count))
+}
+
 source("hotspot_utils.R")
 
 df$age_group <- cut(
