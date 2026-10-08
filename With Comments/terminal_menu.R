@@ -197,6 +197,35 @@ action_demographics <- function() {
   print(table(df$age_group, df$outcome))
 }
 
+# [5] Annual & Weekly Trend Analysis
+action_trends <- function() {
+  print_header("ANNUAL & WEEKLY TREND ANALYSIS")
+  
+  cat("--- ANNUAL CASE TRAJECTORY ---\n")
+  yr_counts <- table(df$morbidity_year)
+  max_count <- max(yr_counts, na.rm = TRUE)
+  
+  for (yr in names(yr_counts)) {
+    cnt <- yr_counts[[yr]]
+    bar_len <- if (max_count > 0) round((cnt / max_count) * 40) else 0
+    bar_str <- paste0(rep("#", bar_len), collapse = "")
+    cat(sprintf("  Year %s | %5d cases | %s\n", yr, cnt, bar_str))
+  }
+  
+  cat("\n--- TOP 5 PEAK MORBIDITY WEEKS ---\n")
+  weekly_stats <- aggregate(case_id ~ morbidity_year + morbidity_week, data = df, FUN = length)
+  names(weekly_stats) <- c("morbidity_year", "morbidity_week", "total_cases")
+  weekly_stats <- weekly_stats[order(-weekly_stats$total_cases), ]
+  
+  top5 <- head(weekly_stats, 5)
+  row_fmt <- "  %-3s | %-6s | %-6s | %11s\n"
+  cat(sprintf(row_fmt, "#", "Year", "Week", "Total Cases"))
+  cat("  --------------------------------------\n")
+  for (i in seq_len(nrow(top5))) {
+    cat(sprintf(row_fmt, i, top5$morbidity_year[i], paste0("W", top5$morbidity_week[i]), format(top5$total_cases[i], big.mark = ",")))
+  }
+}
+
 # ------------------------------------------------------------------------------
 # 4. MAIN TERMINAL MENU LOOP
 # ------------------------------------------------------------------------------
@@ -210,10 +239,11 @@ main <- function() {
     cat("  [2] Barangay Hotspot Rankings & Risk Status\n")
     cat("  [3] Search Barangay Surveillance Profile\n")
     cat("  [4] Demographic & Clinical Analysis\n")
+    cat("  [5] Annual & Weekly Trend Analysis\n")
     cat("  [0] Exit\n")
     cat("====================================================================\n")
     
-    choice <- prompt_input("Enter choice [0-4]: ")
+    choice <- prompt_input("Enter choice [0-5]: ")
     
     switch(
       choice,
@@ -221,6 +251,7 @@ main <- function() {
       "2" = { action_hotspots(); pause_screen() },
       "3" = { action_search(); pause_screen() },
       "4" = { action_demographics(); pause_screen() },
+      "5" = { action_trends(); pause_screen() },
       "0" = {
         cat("\nExiting Baguio Dengue Surveillance Terminal. Stay safe!\n\n")
         break
@@ -229,7 +260,7 @@ main <- function() {
         cat("\nExiting Baguio Dengue Surveillance Terminal. Stay safe!\n\n")
         break
       },
-      cat("\n[!] Invalid input. Please enter an option from 0 to 4.\n")
+      cat("\n[!] Invalid input. Please enter an option from 0 to 5.\n")
     )
   }
 }
