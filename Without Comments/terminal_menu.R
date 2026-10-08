@@ -9,6 +9,8 @@ if (!file.exists(SURVEILLANCE_FILE)) {
 df  <- read.csv(SURVEILLANCE_FILE, stringsAsFactors = FALSE)
 geo <- if (file.exists(GEO_FILE)) read.csv(GEO_FILE, stringsAsFactors = FALSE) else NULL
 
+source("hotspot_utils.R")
+
 df$age_group <- cut(
   df$age,
   breaks = c(0, 5, 12, 18, 35, 60, Inf),
@@ -16,6 +18,8 @@ df$age_group <- cut(
              "19-35 (Young Adults)", "36-60 (Adults)", "60+ (Seniors)"),
   right = TRUE
 )
+
+METRICS_CACHE <- calculate_barangay_hotspots(df, geo)
 
 prompt_input <- function(label) {
   if (interactive()) {
@@ -52,8 +56,6 @@ print_header <- function(title) {
   cat(divider, "\n\n", sep = "")
 }
 
-source("hotspot_utils.R")
-
 
 action_overview <- function() {
   print_header("EPIDEMIOLOGICAL SUMMARY OVERVIEW")
@@ -89,7 +91,7 @@ action_hotspots <- function() {
   cat("  [4] All Barangays\n\n")
   
   choice <- prompt_input("Select filter [1-4, Default=1]: ")
-  metrics <- calculate_barangay_hotspots(df, geo)
+  metrics <- METRICS_CACHE
   
   filtered <- switch(
     choice,
@@ -119,7 +121,7 @@ action_search <- function() {
   query <- prompt_input("Enter barangay name: ")
   if (nchar(query) == 0) return()
   
-  metrics <- calculate_barangay_hotspots(df, geo)
+  metrics <- METRICS_CACHE
   matched <- metrics[grepl(query, metrics$barangay, ignore.case = TRUE), ]
   
   if (nrow(matched) == 0) {
