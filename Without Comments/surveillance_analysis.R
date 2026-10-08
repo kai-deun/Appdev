@@ -28,34 +28,11 @@ cat(sprintf("Severe Cases: %d (%.1f%%) | With Warning Signs: %d (%.1f%%)\n\n",
             severe_cases, (severe_cases/total_cases)*100,
             warning_cases, (warning_cases/total_cases)*100))
 
-brgy_summary <- aggregate(case_id ~ barangay, data = df, FUN = length)
-names(brgy_summary) <- c("barangay", "total_cases")
-
-brgy_severe <- aggregate(case_id ~ barangay, data = subset(df, clinical_classification == "Severe Dengue"), FUN = length)
-names(brgy_severe) <- c("barangay", "severe_cases")
-
-brgy_deaths <- aggregate(case_id ~ barangay, data = subset(df, outcome == "Died"), FUN = length)
-names(brgy_deaths) <- c("barangay", "deaths")
-
-brgy_stats <- merge(brgy_summary, brgy_severe, by = "barangay", all.x = TRUE)
-brgy_stats <- merge(brgy_stats, brgy_deaths, by = "barangay", all.x = TRUE)
-brgy_stats$severe_cases[is.na(brgy_stats$severe_cases)] <- 0
-brgy_stats$deaths[is.na(brgy_stats$deaths)] <- 0
-
-if (!is.null(geo)) {
-  brgy_stats <- merge(brgy_stats, geo, by = "barangay", all.x = TRUE)
-  brgy_stats$incidence_rate_per_10k <- round((brgy_stats$total_cases / brgy_stats$estimated_population) * 10000, 1)
-} else {
-  brgy_stats$incidence_rate_per_10k <- NA
-}
-
-brgy_stats$risk_tier <- ifelse(brgy_stats$total_cases >= 200 | (!is.na(brgy_stats$incidence_rate_per_10k) & brgy_stats$incidence_rate_per_10k >= 150), "HIGH HOTSPOT (EPIDEMIC)",
-                        ifelse(brgy_stats$total_cases >= 80 | (!is.na(brgy_stats$incidence_rate_per_10k) & brgy_stats$incidence_rate_per_10k >= 80), "ALERT (ELEVATED)", "CONTROLLED"))
-
-brgy_stats <- brgy_stats[order(-brgy_stats$total_cases), ]
+source("hotspot_utils.R")
+brgy_stats <- calculate_barangay_hotspots(df, geo)
 
 cat("--- TOP 10 DENGUE HOTSPOT BARANGAYS ---\n")
-print(head(brgy_stats[, c("barangay", "total_cases", "severe_cases", "deaths", "incidence_rate_per_10k", "risk_tier")], 10), row.names = FALSE)
+print(head(brgy_stats[, c("barangay", "total_cases", "severe_cases", "deaths", "attack_rate_10k", "risk_tier")], 10), row.names = FALSE)
 cat("\n")
 
 df$age_group <- cut(df$age,
