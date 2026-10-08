@@ -3,6 +3,16 @@
 # Reusable analytics functions for CLI and batch reporting
 # ==============================================================================
 
+# ------------------------------------------------------------------------------
+# Risk Threshold Configuration
+# ------------------------------------------------------------------------------
+RISK_CONFIG <- list(
+  high_cases         = 200,
+  high_rate_per_10k  = 150,
+  alert_cases        = 80,
+  alert_rate_per_10k = 80
+)
+
 calculate_barangay_hotspots <- function(df, geo = NULL) {
   # Aggregate total cases by barangay
   brgy_cases <- aggregate(case_id ~ barangay, data = df, FUN = length)
@@ -33,10 +43,10 @@ calculate_barangay_hotspots <- function(df, geo = NULL) {
   
   # Hotspot Risk Tier Classification
   metrics$risk_tier <- ifelse(
-    metrics$total_cases >= 200 | (!is.na(metrics$attack_rate_10k) & metrics$attack_rate_10k >= 150),
+    metrics$total_cases >= RISK_CONFIG$high_cases | (!is.na(metrics$attack_rate_10k) & metrics$attack_rate_10k >= RISK_CONFIG$high_rate_per_10k),
     "HIGH (EPIDEMIC)",
     ifelse(
-      metrics$total_cases >= 80 | (!is.na(metrics$attack_rate_10k) & metrics$attack_rate_10k >= 80),
+      metrics$total_cases >= RISK_CONFIG$alert_cases | (!is.na(metrics$attack_rate_10k) & metrics$attack_rate_10k >= RISK_CONFIG$alert_rate_per_10k),
       "ALERT (ELEVATED)", 
       "CONTROLLED"
     )
