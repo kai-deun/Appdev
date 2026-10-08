@@ -225,6 +225,13 @@ action_export <- function() {
 
 main <- function() {
   clear_screen()
+  
+  cat("+------------------------------------------------------------------+\n")
+  cat("| NOTICE: DATA IS SYNTHETIC & SIMULATED                            |\n")
+  cat("| This dataset is for epidemiological demonstration purposes only  |\n")
+  cat("| and does not represent actual patient records or medical data.   |\n")
+  cat("+------------------------------------------------------------------+\n\n")
+  
   repeat {
     cat("====================================================================\n")
     cat("        BAGUIO DENGUE SURVEILLANCE & HOTSPOT TERMINAL SYSTEM        \n")
